@@ -3,7 +3,7 @@
 
 export interface User {
   id: number;
-  user: string;
+  username: string;
   email: string;
   provider: string;
   confirmed: boolean;
