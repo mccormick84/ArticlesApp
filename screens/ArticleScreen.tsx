@@ -19,7 +19,6 @@ export default function ArticleScreen() {
   const commentsQuery = useQuery(['comments', id], () => getComments(id));
 
   const {bottom} = useSafeAreaInsets();
-  console.log(useSafeAreaInsets());
 
   // 둘 중 하나라도 준비되지 않은 데이터가 있으면 스피너 보여주기
   if (!articleQuery.data || !commentsQuery.data) {

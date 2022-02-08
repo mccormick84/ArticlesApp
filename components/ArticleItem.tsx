@@ -21,7 +21,7 @@ export default function ArticleItem({
     navigation.navigate('Article', {
       id,
     });
-    console.log(id);
+    console.log('id:', id);
   };
 
   const formattedDate = new Date(publishedAt).toLocaleString();
