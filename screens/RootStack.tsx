@@ -2,8 +2,9 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {RootStackParamList} from './types';
 import MainTab from './MainTab';
+import ArticleScreen from './ArticleScreen';
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootStack() {
   return (
@@ -13,6 +14,7 @@ export default function RootStack() {
         component={MainTab}
         options={{headerShown: false}}
       />
+      <Stack.Screen name={'Article'} component={ArticleScreen} />
     </Stack.Navigator>
   );
 }
