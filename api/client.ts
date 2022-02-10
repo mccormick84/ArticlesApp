@@ -9,4 +9,13 @@ const client = axios.create({
   baseURL,
 });
 
+// axios 클라이언트에 공통 Authorization 헤더를 설정
+export function applyToken(jwt: string) {
+  client.defaults.headers.Authorization = `Bearer ${jwt}`;
+}
+// 설정된 헤더를 초기화
+export function clearToken() {
+  client.defaults.headers.Authorization = undefined;
+}
+
 export default client;
