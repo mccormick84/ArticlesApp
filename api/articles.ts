@@ -11,3 +11,9 @@ export async function getArticle(id: number) {
   const response = await client.get<Article>(`/articles/${id}`);
   return response.data;
 }
+
+//게시글을 작성하는 API 함수
+export async function writeArticle(params: {title: string; body: string}) {
+  const response = await client.post<Article>('/.articles', params);
+  return response.data;
+}
