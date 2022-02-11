@@ -1,11 +1,16 @@
 import React from 'react';
 import {StyleSheet, Pressable, Platform, Text} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {useNavigation} from '@react-navigation/native';
+import {RootStackNavigationProp} from '../screens/types';
 
 export default function WriteButton() {
+  const navigation = useNavigation<RootStackNavigationProp>();
+
   const onPress = () => {
-    /*TODO: 구현예정*/
+    navigation.navigate('Write', {});
   };
+
   return (
     <Pressable
       style={({pressed}) => [
@@ -14,8 +19,8 @@ export default function WriteButton() {
       ]}
       android_ripple={{color: '#eeeeee'}}
       onPress={onPress}>
-      <MaterialIcons name={'add-article'} size={24} />
-      <Text>새 게시글 작성</Text>
+      <MaterialIcons name={'add-circle'} size={24} />
+      <Text style={styles.text}>새 게시글 작성</Text>
     </Pressable>
   );
 }
