@@ -10,16 +10,23 @@ import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {RootStackNavigationProp} from './types';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {useMutation} from 'react-query';
+import {writeArticle} from '../api/articles';
 
 export default function WriteScreen() {
   const {top} = useSafeAreaInsets();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
+  const {mutate: write} = useMutation(writeArticle, {
+    onSuccess: () => {
+      navigation.goBack();
+    },
+  });
 
   const navigation = useNavigation<RootStackNavigationProp>();
   const onSubmit = useCallback(() => {
-    /*TODO: 구현 예정*/
-  }, []);
+    write({title, body});
+  }, [write, title, body]);
 
   useEffect(() => {
     navigation.setOptions({
