@@ -42,7 +42,7 @@ export default function WriteScreen() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRightContainer: styles.headerRightContainer,
+      headerRightContainerStyle: styles.headerRightContainer,
       headerRight: () => (
         <Pressable
           hitSlop={8}
