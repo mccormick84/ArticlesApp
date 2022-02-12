@@ -7,12 +7,29 @@ import {useInfiniteQuery} from 'react-query';
 import {Article} from '../api/types';
 
 export default function ArticlesScreen() {
-  const {data, isFetchingNextPage, fetchNextPage} = useInfiniteQuery(
+  const {
+    data,
+    isFetchingNextPage,
+    fetchNextPage,
+    fetchPreviousPage,
+    isFetchingPreviousPage,
+  } = useInfiniteQuery(
     'articles',
-    ({pageParam}) => getArticles({cursor: pageParam}),
+    ({pageParam}) => getArticles({...pageParam}),
     {
       getNextPageParam: lastPage =>
-        lastPage.length === 10 ? lastPage[lastPage.length - 1].id : undefined,
+        lastPage.length === 10
+          ? {cursor: lastPage[lastPage.length - 1].id}
+          : undefined,
+      getPreviousPageParam: (_, allPages) => {
+        const validPage = allPages.find(page => page.length > 0);
+        if (!validPage) {
+          return undefined;
+        }
+        return {
+          prevCursor: validPage[0].id,
+        };
+      },
     },
   );
   const items = useMemo(() => {
@@ -40,6 +57,8 @@ export default function ArticlesScreen() {
       showWriteButton={!!user}
       isFetchingNextPage={isFetchingNextPage}
       fetchNextPage={fetchNextPage}
+      refresh={fetchPreviousPage}
+      isRefreshing={isFetchingPreviousPage}
     />
   );
 }
