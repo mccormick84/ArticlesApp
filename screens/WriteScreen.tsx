@@ -22,11 +22,14 @@ export default function WriteScreen() {
   const queryClient = useQueryClient();
   const {mutate: write} = useMutation(writeArticle, {
     onSuccess: article => {
-      /*// queryClient.invalidateQueries('articles'); // article 캐시 키를 만료시키기
+      // article 캐시 키를 만료시키기
+      // queryClient.invalidateQueries('articles');
+
       // 캐시 데이터 조회
-      const articles = queryClient.getQueryData<Article[]>('articles') ?? [];
+      // const articles = queryClient.getQueryData<Article[]>('articles') ?? [];
       // 캐시 데이터 업데이트
-      queryClient.setQueryData('articles', articles.concat(article));*/
+      // queryClient.setQueryData('articles', articles.concat(article));
+
       // 캐시 키로 데이터를 조회한 후 그 데이터를 업데이터 함수를 사용하여 업데이트
       queryClient.setQueryData<Article[]>('articles', articles =>
         (articles ?? []).concat(article),
@@ -42,7 +45,7 @@ export default function WriteScreen() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRightContainerStyle: styles.headerRightContainer,
+      // headerRightContainerStyle: styles.headerRightContainer,
       headerRight: () => (
         <Pressable
           hitSlop={8}
