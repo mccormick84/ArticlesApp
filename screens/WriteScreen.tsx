@@ -1,4 +1,4 @@
-import React, {useCallback, useState, useEffect} from 'react';
+import React, {useCallback, useState, useEffect, useMemo} from 'react';
 import {
   StyleSheet,
   KeyboardAvoidingView,
@@ -7,19 +7,31 @@ import {
   Pressable,
 } from 'react-native';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
-import {useNavigation} from '@react-navigation/native';
-import {RootStackNavigationProp} from './types';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {RootStackNavigationProp, RootStackParamList} from './types';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {InfiniteData, useQueryClient, useMutation} from 'react-query';
-import {writeArticle} from '../api/articles';
+import {modifyArticle, writeArticle} from '../api/articles';
 import {Article} from '../api/types';
 
-export default function WriteScreen() {
-  const {top} = useSafeAreaInsets();
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
+type WriteScreenRouteProp = RouteProp<RootStackParamList, 'Write'>;
 
+export default function WriteScreen() {
+  const {params} = useRoute<WriteScreenRouteProp>();
   const queryClient = useQueryClient();
+  //params.id가 존재한다면 querClient를 통해 캐시 조회
+  const cachedArticle = useMemo(
+    () =>
+      params.articleId
+        ? queryClient.getQueryData<Article>(['article', params.articleId])
+        : null,
+    [queryClient, params.articleId],
+  );
+  const {top} = useSafeAreaInsets();
+  // 캐시된 데이터가 존재한다면 해당 데이터 정보를 초기값으로 사용
+  const [title, setTitle] = useState(cachedArticle?.title ?? '');
+  const [body, setBody] = useState(cachedArticle?.body ?? '');
+
   const {mutate: write} = useMutation(writeArticle, {
     onSuccess: article => {
       queryClient.setQueryData<InfiniteData<Article[]>>('articles', data => {
@@ -41,10 +53,38 @@ export default function WriteScreen() {
     },
   });
 
+  const {mutate: modify} = useMutation(modifyArticle, {
+    onSuccess: article => {
+      // 게시글 목록 수정
+      queryClient.setQueryData<InfiniteData<Article[]>>('articles', data => {
+        // data의 타입이 undefined가 아님을 명시하기 위해 추가
+        // modify의 경우 data가 무조건 유효하기 때문에 실제로 실행될 일은 없음
+        if (!data) {
+          return {pageParams: [], pages: []};
+        }
+        return {
+          pageParams: data!.pageParams,
+          page: data!.pages.map(page =>
+            // 수정할 항목이 있는 페이지를 찾은 후
+            page.find(a => a.id === params.articleId)
+              ? page.map(a => (a.id === params.articleId ? article : a))
+              : page,
+          ),
+        };
+      });
+      // 게시글 수정
+      queryClient.setQueryData(['article', params.articleId], article);
+      navigation.goBack();
+    },
+  });
   const navigation = useNavigation<RootStackNavigationProp>();
   const onSubmit = useCallback(() => {
-    write({title, body});
-  }, [write, title, body]);
+    if (params.articleId) {
+      modify({id: params.articleId, title, body});
+    } else {
+      write({title, body});
+    }
+  }, [write, modify, title, body, params.articleId]);
 
   useEffect(() => {
     navigation.setOptions({
