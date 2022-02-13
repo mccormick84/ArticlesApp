@@ -42,3 +42,9 @@ export async function modifyArticle(params: {
   const response = await client.put<Article>(`/articles/${id}`, {title, body});
   return response.data;
 }
+
+// 게시글 삭제
+export async function deleteArticle(id: number) {
+  await client.delete<Article>(`/articles/${id}`);
+  return null;
+}
