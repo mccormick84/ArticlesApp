@@ -8,12 +8,14 @@ import {getComments} from '../api/comments';
 import ArticleView from '../components/ArticleView';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import CommentItem from '../components/CommentItem';
+import {useUserState} from '../contexts/UserContext';
 
 type ArticleScreenRouteProp = RouteProp<RootStackParamList, 'Article'>;
 
 export default function ArticleScreen() {
   const {params} = useRoute<ArticleScreenRouteProp>();
   const {id} = params;
+  const [currentUser] = useUserState();
 
   const articleQuery = useQuery(['article', id], () => getArticle(id));
   const commentsQuery = useQuery(['comments', id], () => getComments(id));
@@ -32,6 +34,7 @@ export default function ArticleScreen() {
   }
 
   const {title, body, published_at, user} = articleQuery.data;
+  const isMyArticle = currentUser?.id === user.id;
 
   return (
     <FlatList
@@ -55,6 +58,8 @@ export default function ArticleScreen() {
           body={body}
           publishedAt={published_at}
           username={user.username}
+          id={id}
+          isMyArticle={isMyArticle}
         />
       }
     />

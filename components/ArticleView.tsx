@@ -1,11 +1,14 @@
 import React from 'react';
 import {View, StyleSheet, Text} from 'react-native';
+import ArticleActionButtons from './ArticleActionButtons';
 
 export interface ArticleViewProps {
   title: string;
   body: string;
   publishedAt: string;
   username: string;
+  id: number;
+  isMyArticle: boolean;
 }
 
 export default function ArticleView({
@@ -13,6 +16,8 @@ export default function ArticleView({
   body,
   publishedAt,
   username,
+  id,
+  isMyArticle,
 }: ArticleViewProps) {
   const formattedDate = new Date(publishedAt).toLocaleString();
 
@@ -22,6 +27,7 @@ export default function ArticleView({
       <Text style={styles.username}>{username}</Text>
       <Text style={styles.date}>{formattedDate}</Text>
       <Text style={styles.separator} />
+      {isMyArticle && <ArticleActionButtons articleId={id} />}
       <Text>{body}</Text>
     </View>
   );
