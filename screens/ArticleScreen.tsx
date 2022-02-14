@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
-import {StyleSheet, ActivityIndicator, FlatList} from 'react-native';
+import {ActivityIndicator, FlatList, StyleSheet} from 'react-native';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {RootStackParamList} from './types';
 import {useMutation, useQuery, useQueryClient} from 'react-query';
 import {getArticle} from '../api/articles';
-import {deleteComment, getComments} from '../api/comments';
+import {deleteComment, getComments, modifyComment} from '../api/comments';
 import ArticleView from '../components/ArticleView';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import CommentItem from '../components/CommentItem';
@@ -12,6 +12,7 @@ import {useUserState} from '../contexts/UserContext';
 import CommentInput from '../components/CommentInput';
 import AskDialog from '../components/AskDialog';
 import {Comment} from '../api/types';
+import CommentModal from '../components/CommentModal';
 
 type ArticleScreenRouteProp = RouteProp<RootStackParamList, 'Article'>;
 
@@ -43,6 +44,7 @@ export default function ArticleScreen() {
     null,
   );
   const [askRemoveComment, setAskRemoveComment] = useState(false);
+  const [modifying, setModifying] = useState(false);
 
   const queryClient = useQueryClient();
   const {mutate: remove} = useMutation(deleteComment, {
@@ -72,10 +74,37 @@ export default function ArticleScreen() {
     setAskRemoveComment(false);
   };
 
+  const {mutate: modify} = useMutation(modifyComment, {
+    onSuccess: comment => {
+      queryClient.setQueryData<Comment[]>(['comments', id], comments =>
+        comments
+          ? comments.map(c => (c.id === selectedCommentId ? comment : c))
+          : [],
+      );
+    },
+  });
+
   const onModify = (commentId: number) => {
-    // TODO : 구현 예정
-    console.log(commentId);
+    setSelectedCommentId(commentId);
+    setModifying(true);
   };
+
+  const onCancelModify = () => {
+    setModifying(false);
+  };
+
+  const onSubmitModify = (message: string) => {
+    setModifying(false);
+    modify({
+      id: selectedCommentId!,
+      articleId: id,
+      message,
+    });
+  };
+
+  const selectedComment = commentsQuery.data?.find(
+    comment => comment.id === selectedCommentId,
+  );
 
   return (
     <>
@@ -122,6 +151,12 @@ export default function ArticleScreen() {
         confirmText={'삭제'}
         onClose={onCancelRemove}
         onConfirm={onConfirmRemove}
+      />
+      <CommentModal
+        visible={modifying}
+        initialMessage={selectedComment?.message}
+        onClose={onCancelModify}
+        onSubmit={onSubmitModify}
       />
     </>
   );
